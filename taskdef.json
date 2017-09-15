@@ -1,19 +1,6 @@
 {
-  "requiresAttributes": [
-    {
-      "value": null,
-      "name": "com.amazonaws.ecs.capability.ecr-auth",
-      "targetId": null,
-      "targetType": null
-    },
-    {
-      "value": null,
-      "name": "com.amazonaws.ecs.capability.docker-remote-api.1.21",
-      "targetId": null,
-      "targetType": null
-    }
-  ],
-  "taskDefinitionArn": "arn:aws:ecs:ap-southeast-1:669176808237:task-definition/httpd:12",
+  "family": "httpd",
+  "taskDefinitionArn": "arn:aws:ecs:ap-southeast-1:669176808237:task-definition/httpd:v_%BUILD_NUMBER%",
   "networkMode": "bridge",
   "status": "ACTIVE",
   "revision": 12,
@@ -68,6 +55,5 @@
       },
       "name": "httpd-logs"
     }
-  ],
-  "family": "httpd"
+  ]
 }
