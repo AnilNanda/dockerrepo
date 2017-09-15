@@ -3,5 +3,6 @@ FROM centos:7
 MAINTAINER CloudOps Version 1.0
 
 RUN yum install -y httpd
+COPY index.html /var/www/html/
 
 CMD /usr/sbin/httpd -D FOREGROUND
