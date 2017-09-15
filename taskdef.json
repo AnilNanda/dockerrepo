@@ -19,7 +19,7 @@
           "readOnly": false
         }
       ],
-      "name": "httpd",
+      "name": "httpd-jenkins",
       "image": "%REPOSITORY_URI%:httpd-v_%BUILD_NUMBER%",
       "cpu": 0,
       "memoryReservation": 128
