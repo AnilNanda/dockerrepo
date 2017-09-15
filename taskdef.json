@@ -3,7 +3,7 @@
   "taskDefinitionArn": "arn:aws:ecs:ap-southeast-1:669176808237:task-definition/httpd:v_%BUILD_NUMBER%",
   "networkMode": "bridge",
   "status": "ACTIVE",
-  "revision": 12,
+  "revision": v_%BUILD_NUMBER%,
   "taskRoleArn": null,
   "containerDefinitions": [
     {
@@ -37,7 +37,7 @@
       "links": null,
       "workingDirectory": null,
       "readonlyRootFilesystem": null,
-      "image": "%REPOSITORY_URI%:v_%BUILD_NUMBER%",
+      "image": "%REPOSITORY_URI%:httpd-v_%BUILD_NUMBER%",
       "command": null,
       "user": null,
       "dockerLabels": null,
