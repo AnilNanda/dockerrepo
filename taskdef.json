@@ -28,7 +28,7 @@
   "volumes": [
     {
       "host": {
-        "sourcePath": /tmp/
+        "sourcePath": "/tmp/"
       },
       "name": "httpd-logs"
     }
