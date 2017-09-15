@@ -1,9 +1,7 @@
 {
   "family": "httpd",
-  "taskDefinitionArn": "arn:aws:ecs:ap-southeast-1:669176808237:task-definition/httpd:v_%BUILD_NUMBER%",
   "networkMode": "bridge",
   "status": "ACTIVE",
-  "revision": v_%BUILD_NUMBER%,
   "taskRoleArn": null,
   "containerDefinitions": [
     {
