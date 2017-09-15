@@ -1,16 +1,9 @@
 {
-  "family": "httpd",
+  "family": "httpd-jenkins",
   "networkMode": "bridge",
-  "status": "ACTIVE",
-  "taskRoleArn": null,
   "containerDefinitions": [
     {
       "volumesFrom": [],
-      "memory": null,
-      "extraHosts": null,
-      "dnsServers": null,
-      "disableNetworking": null,
-      "dnsSearchDomains": null,
       "portMappings": [
         {
           "hostPort": 0,
@@ -18,9 +11,7 @@
           "protocol": "tcp"
         }
       ],
-      "hostname": null,
       "essential": true,
-      "entryPoint": null,
       "mountPoints": [
         {
           "containerPath": "/var/log/httpd/",
@@ -29,27 +20,15 @@
         }
       ],
       "name": "httpd",
-      "ulimits": null,
-      "dockerSecurityOptions": null,
-      "environment": [],
-      "links": null,
-      "workingDirectory": null,
-      "readonlyRootFilesystem": null,
       "image": "%REPOSITORY_URI%:httpd-v_%BUILD_NUMBER%",
-      "command": null,
-      "user": null,
-      "dockerLabels": null,
-      "logConfiguration": null,
       "cpu": 0,
-      "privileged": null,
       "memoryReservation": 128
     }
   ],
-  "placementConstraints": [],
   "volumes": [
     {
       "host": {
-        "sourcePath": null
+        "sourcePath": /tmp/
       },
       "name": "httpd-logs"
     }
