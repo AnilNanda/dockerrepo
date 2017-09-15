@@ -1,0 +1,73 @@
+{
+  "requiresAttributes": [
+    {
+      "value": null,
+      "name": "com.amazonaws.ecs.capability.ecr-auth",
+      "targetId": null,
+      "targetType": null
+    },
+    {
+      "value": null,
+      "name": "com.amazonaws.ecs.capability.docker-remote-api.1.21",
+      "targetId": null,
+      "targetType": null
+    }
+  ],
+  "taskDefinitionArn": "arn:aws:ecs:ap-southeast-1:669176808237:task-definition/httpd:12",
+  "networkMode": "bridge",
+  "status": "ACTIVE",
+  "revision": 12,
+  "taskRoleArn": null,
+  "containerDefinitions": [
+    {
+      "volumesFrom": [],
+      "memory": null,
+      "extraHosts": null,
+      "dnsServers": null,
+      "disableNetworking": null,
+      "dnsSearchDomains": null,
+      "portMappings": [
+        {
+          "hostPort": 0,
+          "containerPort": 80,
+          "protocol": "tcp"
+        }
+      ],
+      "hostname": null,
+      "essential": true,
+      "entryPoint": null,
+      "mountPoints": [
+        {
+          "containerPath": "/var/log/httpd/",
+          "sourceVolume": "httpd-logs",
+          "readOnly": false
+        }
+      ],
+      "name": "httpd",
+      "ulimits": null,
+      "dockerSecurityOptions": null,
+      "environment": [],
+      "links": null,
+      "workingDirectory": null,
+      "readonlyRootFilesystem": null,
+      "image": "%REPOSITORY_URI%:v_%BUILD_NUMBER%",
+      "command": null,
+      "user": null,
+      "dockerLabels": null,
+      "logConfiguration": null,
+      "cpu": 0,
+      "privileged": null,
+      "memoryReservation": 128
+    }
+  ],
+  "placementConstraints": [],
+  "volumes": [
+    {
+      "host": {
+        "sourcePath": null
+      },
+      "name": "httpd-logs"
+    }
+  ],
+  "family": "httpd"
+}
