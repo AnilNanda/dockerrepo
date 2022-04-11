@@ -28,5 +28,11 @@ pipeline {
 		  	docker.image("${params.ECR_REPO_NAME}:${env.BUILD_ID}").push("${params.ECR_REPO_NAME}-${env.BUILD_ID}")
 			docker.image("${params.ECR_REPO_NAME}:${env.BUILD_ID}").push("latest")
 		}}}}
+    stage('cleanup images'){
+        steps{
+            script{
+            sh "docker system prune -af"
+        }}
+    }
     }
 }
