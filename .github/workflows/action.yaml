@@ -1,0 +1,117 @@
+name: CI/CD
+
+# ------Branch rules to trigger the workflow--------
+on:
+  push:
+    branches:
+      - main
+
+  # -------This is used to trigger the workflow manually from Github UI.---------
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      #----- Check out the Git repo.--------
+      - name: Checkout Repository
+        uses: actions/checkout@v2
+
+      - name: Set up environment
+        if: endsWith(github.ref, '/main')
+        run: |
+          echo "DOCKER_FILE=./Dockerfile" >> $GITHUB_ENV
+          echo "KUBE_CONFIG=${{ secrets.KUBE_CONFIG_PROD }}" >> $GITHUB_ENV
+          echo "AWS_ACCESS_KEY=${{ secrets.AWS_ACCESS_KEY }}" >> $GITHUB_ENV
+          echo "AWS_SECRET_KEY=${{ secrets.AWS_SECRET_KEY }}" >> $GITHUB_ENV
+
+
+      - name: Extract Branch and Repository Name
+        id: extract_branch
+        shell: bash
+        run: |
+          echo "BRANCH=$(echo ${GITHUB_REF#refs/heads/})" >> $GITHUB_ENV
+          echo "SERVICE=httpd-service" >> $GITHUB_ENV
+
+      - name: Clean Up
+        run: docker system prune -f
+
+      - name: Update Environment Name
+        id: update-environment-name
+        run: |
+          sed -i 's@APP_ENV@${{ env.APP_ENV }}@g' ${{ env.DOCKER_FILE }}
+
+      #-----setup the Docker image------
+      - name: Build Docker image
+        id: build-image
+        run: docker build . -f Dockerfile -t ${{ env.SERVICE }}
+
+      # ------Configure AWS credentials based on keys stored in Github secrets.-----
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ env.AWS_ACCESS_KEY }}
+          aws-secret-access-key: ${{ env.AWS_SECRET_KEY }}
+          aws-region: us-east-1
+
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v1
+
+      # -----Add tags to docker image and push to ECR--------
+      - name: Push Docker images to ECR
+        id: push-image
+        env:
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          ECR_REPOSITORY: ${{ env.SERVICE }}
+          TAG_COMMIT: ${{ github.sha }}
+          TAG_BUILD: '${{ github.run_id }}'
+          TAG_RUN_NUMBER: '${{ env.BRANCH }}-${{ github.run_number }}'
+          TAG_LATEST: 'latest'
+        run: |
+          docker tag ${{ env.SERVICE }} $ECR_REGISTRY/$ECR_REPOSITORY:$TAG_COMMIT
+          docker tag ${{ env.SERVICE }} $ECR_REGISTRY/$ECR_REPOSITORY:$TAG_BUILD
+          docker tag ${{ env.SERVICE }} $ECR_REGISTRY/$ECR_REPOSITORY:$TAG_LATEST
+          docker tag ${{ env.SERVICE }} $ECR_REGISTRY/$ECR_REPOSITORY:$TAG_RUN_NUMBER
+          docker push $ECR_REGISTRY/$ECR_REPOSITORY:$TAG_COMMIT
+          docker push $ECR_REGISTRY/$ECR_REPOSITORY:$TAG_BUILD
+          docker push $ECR_REGISTRY/$ECR_REPOSITORY:$TAG_LATEST
+          docker push $ECR_REGISTRY/$ECR_REPOSITORY:$TAG_RUN_NUMBER
+
+      # ----This step updates the deployment file with latest image tag.----
+      - name: Get private action
+        uses: actions/checkout@v2
+        with:
+          repository: <org-name>/argo-deploy
+          token: ${{ secrets.GIT_PASSWORD }} # stored in GitHub secrets
+          path: .github/actions/argo-deploy
+          
+      - name: Update image tag in helm chart
+        uses: ./.github/actions/argo-deploy # Uses an action in the root directory
+        id: deployment-update
+        with:
+          image_id: ${{ steps.login-ecr.outputs.registry }}/${{ env.SERVICE }}:${{ github.sha }}
+          git_password: ${{ secrets.GIT_PASSWORD }}
+          app_name: ${{ env.SERVICE }}
+          service_name: ${{ env.SERVICE }}
+          environment: ${{ env.APP_ENV }}
+
+
+      # -----Clean Up-----
+      - name: Cleanup
+        if: always()
+        run: |
+          echo "Docker Images before cleanup"
+          docker image ls
+          echo "Clean repostitory images"
+          if docker images --format '{{.Repository}}:{{.Tag}}' | grep -q '${{ env.SERVICE }}'; then
+            docker rmi $(docker images --format '{{.Repository}}:{{.Tag}}' | grep '${{ env.SERVICE }}') -f
+          else
+            echo "No repo image found."
+          fi
+          echo "Docker Prune"
+          docker system prune -f
+          echo "Docker Images after cleanup"
+          docker image ls
+
